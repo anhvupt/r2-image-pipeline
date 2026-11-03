@@ -1,0 +1,3 @@
+# No secrets are required.
+# Tenant config is the TENANT_CONFIG JSON var in wrangler.jsonc, not a secret.
+# Copy this file to .dev.vars only if you later add local secrets.

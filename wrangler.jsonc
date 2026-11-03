@@ -1,0 +1,89 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "r2-image-pipeline",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-11-02",
+	"compatibility_flags": ["nodejs_compat"],
+	// Queue consumer only. No public workers.dev URL and no route.
+	// Deploy with `wrangler login` into the Cloudflare account that owns
+	// the R2 bucket `dinedl`. Do not set account_id in this file.
+	// A Worker cannot bind an R2 bucket that lives in another account.
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1
+		},
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"images": {
+		"binding": "IMAGES"
+	},
+	"r2_buckets": [
+		{
+			"binding": "dinedl",
+			"bucket_name": "dinedl"
+		}
+		// TOVN: uncomment when the real bucket name is known, and only if that
+		// bucket is in the same Cloudflare account as `dinedl`.
+		// binding must be a valid JavaScript identifier. It must match the
+		// TENANT_CONFIG key unless that row sets "binding".
+		// {
+		//   "binding": "REPLACE_WITH_TOVN_BUCKET_NAME",
+		//   "bucket_name": "REPLACE_WITH_TOVN_BUCKET_NAME"
+		// },
+		// Haibontui is a later tenant. Same placeholder. No bucket name yet.
+		// {
+		//   "binding": "REPLACE_WITH_HAIBONTUI_BUCKET_NAME",
+		//   "bucket_name": "REPLACE_WITH_HAIBONTUI_BUCKET_NAME"
+		// }
+	],
+	"queues": {
+		"consumers": [
+			{
+				"queue": "r2-image-pipeline",
+				"max_batch_size": 1,
+				"max_batch_timeout": 1,
+				"max_retries": 3,
+				"retry_delay": 10
+			}
+		]
+	},
+	"vars": {
+		"TENANT_CONFIG": {
+			"dinedl": {
+				"tenant": "dinedl",
+				"maxWidth": 1920,
+				"maxHeight": 1920,
+				"quality": 80,
+				"format": "webp",
+				"mode": "overwrite",
+				"watchPrefixes": ["tours/", "blog/"],
+				"watchSuffixes": [".jpg", ".jpeg", ".png", ".webp"],
+				"skipIfProcessedMeta": true
+			}
+			// TOVN: add one row. Default mode is overwrite so object URLs stay stable.
+			// Set mode to "sibling" only if that tenant must keep the original bytes
+			// beside a new key (tours/slug/id.jpg stays, tours/slug/id.webp is added).
+			// Do not invent watch prefixes. Replace both placeholders.
+			// "REPLACE_WITH_TOVN_BUCKET_NAME": {
+			//   "tenant": "tovn",
+			//   "maxWidth": 1920,
+			//   "maxHeight": 1920,
+			//   "quality": 80,
+			//   "format": "webp",
+			//   "mode": "overwrite",
+			//   "watchPrefixes": ["REPLACE_WITH_TOVN_PREFIX/"],
+			//   "watchSuffixes": [".jpg", ".jpeg", ".png", ".webp"],
+			//   "skipIfProcessedMeta": true
+			// },
+			// Haibontui: same shape, mode overwrite, bucket name still unknown.
+			// "REPLACE_WITH_HAIBONTUI_BUCKET_NAME": { "...": "same fields as dinedl" }
+		}
+	}
+}

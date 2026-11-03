@@ -1,0 +1,23 @@
+{
+	"name": "r2-image-pipeline",
+	"version": "0.0.0",
+	"private": true,
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest run",
+		"cf-typegen": "wrangler types",
+		"typecheck": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
+		"backfill": "node scripts/backfill.mjs"
+	},
+	"devDependencies": {
+		"@types/node": "^26.6.6",
+		"typescript": "^5.5.2",
+		"vitest": "~5.0.3",
+		"wrangler": "^4"
+	}
+}
